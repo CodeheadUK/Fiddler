@@ -1,0 +1,276 @@
+<!doctype html>
+<html>
+    <head>
+        <title>ByteFiddler</title>
+        <link href="style.css" rel="stylesheet">
+        <link href="js/jquery-ui.css" rel="stylesheet">
+        <script src="js/external/jquery/jquery.js"></script>
+        <script src="js/jquery-ui.js"></script>
+    </head>
+    <body>
+        <div>
+            <section class="titleBar">
+                <label for="octal">Octal</label>
+            </section>
+            <section>
+                <input type="text" name="octal" id="octal" class="numberBox" placeholder="Base 8">
+            </section>
+            <section class="titleBar">
+                <label for="decimal">Decimal</label>
+            </section>
+            <section>
+                <input type="text" name="decimal" id="decimal" class="numberBox" placeholder="Base 10">
+            </section>
+            <section class="titleBar">
+                <label for="hex">Hexadecimal</label>
+            </section>
+            <section>
+                <input type="text" name="hex" id="hex" class="numberBox" placeholder="Base 16">
+            </section>
+        </div>
+        <div>
+            <section class="titleBar">
+                <label for="ascii">ASCII Char</label>
+            </section>
+            <section>
+                <input type="text" class="charBox" name="ascii" id="ascii" class="numberBox" placeholder="ASCII">
+            </section>            
+        </div><br>
+
+        <div>
+            <section class="titleBar">
+                <label for="binary">Binary</label>
+            </section>
+            <section>
+                <div name="binary" id="binary" placeholder="Base 2" class="numberBox">
+                    <button class="binaryToggle" id="bin7">0</button>
+                    <button class="binaryToggle" id="bin6">0</button>
+                    <button class="binaryToggle" id="bin5">0</button>
+                    <button class="binaryToggle" id="bin4">0</button>
+                    <button class="binaryToggle" id="bin3">0</button>
+                    <button class="binaryToggle" id="bin2">0</button>
+                    <button class="binaryToggle" id="bin1">0</button>
+                    <button class="binaryToggle" id="bin0">0</button>
+                </div>
+                <div>
+                    <button class="binButton">Reverse Bits</button>
+                    <button class="binButton">Invert Bits</button>
+                </div>
+            </section>
+        </div>
+                   
+<script>
+
+    $(document).ready(function() {
+        console.log("JQuery Ready!");
+    });
+
+    function errFlash(target) {
+        target.addClass("errBackground");
+        target.removeClass("errBackground", 300, "easeOutSine");
+    }
+
+    // Octal
+    $("#octal").keypress(function(k_event) {
+        if(/^([0-7])$/.test(String.fromCharCode(k_event.charCode)) == false) {
+            console.log("Keypress CharCode Deny");
+            errFlash($(this));
+            event.preventDefault();
+        }
+    });
+
+    var last_valid_octal = "";
+
+    // Parse updated content for validity
+    $("#octal").bind('input', function(in_event) {
+        var new_val = $(this).val();
+        var new_num = parseInt(new_val, 8);
+
+        if(new_num < 0 || new_num > 255) {
+            console.log("Input Range Deny");
+            errFlash($(this));
+            $(this).val(last_valid_octal.toString(8));
+        } else {
+            console.log(new_num);
+            last_valid_octal = new_num;
+            updateValues(new_num, "octal");
+        }
+    });
+
+    // Decimal
+    $("#decimal").keypress(function(k_event) {
+        if(/^([0-9])$/.test(String.fromCharCode(k_event.charCode)) == false) {
+            console.log("Keypress CharCode Deny");
+            errFlash($(this));
+            event.preventDefault();
+        }
+    });
+
+    var last_valid_decimal = "";
+
+    // Parse updated content for validity
+    $("#decimal").bind('input', function(in_event) {
+        var new_val = $(this).val();
+        var new_num = parseInt(new_val);
+
+        if(isFinite(new_val) == false) {
+            consle.log("Input Format Deny");
+            errFlash($(this));
+            $(this).val(last_valid_decimal);
+        } else if (new_num < 0 || new_num > 255 ){
+            console.log(new_num);
+            errFlash($(this));
+            $(this).val(last_valid_decimal);
+        } else {
+            last_valid_decimal = new_num;
+            updateValues(new_num, "decimal");
+        }
+    });  
+
+    // Hex
+    $("#hex").keypress(function(k_event) {
+        if(/^([0-9A-Fa-f])$/.test(String.fromCharCode(k_event.charCode)) == false) {
+            console.log("Keypress CharCode Deny");
+            errFlash($(this));
+            event.preventDefault();
+        }
+    });
+
+    var last_valid_hex = "";
+
+    // Parse updated content for validity
+    $("#hex").bind('input', function(in_event) {
+        var new_val = $(this).val();
+        var new_num = parseInt(new_val, 16);
+
+        if(new_num < 0 || new_num > 255) {
+            console.log("Input Range Deny");
+            errFlash($(this));
+            $(this).val(last_valid_hex.toString(16));
+        } else {
+            console.log(new_num);
+            last_valid_hex = new_num;
+            updateValues(new_num, "hex");
+        }
+    }); 
+
+    // Manage binary buttons
+    $(".binaryToggle").click(function(ct) {
+        $(this).text(parseInt($(this).text()) ^1);
+        getBinValue();
+    })     
+
+    // Limit ASCII box to a single char
+    $("#ascii").keypress(function(k_event) {
+        $(this).val(String.fromCharCode(k_event.charCode))
+        event.preventDefault()
+        updateValues(k_event.charCode, "ascii");
+    });
+
+    // Parse updated ASCII content for validity
+    $("#ascii").bind('input', function(in_event) {
+        var newChar = $(this).val();
+        console.log(newChar);
+        console.log(newChar.length);
+        if(newChar.length > 1) { // Handle single chars from clipboard, etc
+            newChar = newChar.substr(newChar.length-1, 1);
+            $(this).val(newChar);
+            updateValues(newChar.charCodeAt(0), "ascii");
+        } else if (newChar.length == 1) {
+            updateValues(newChar.charCodeAt(0), "ascii");
+        } else {
+            updateValues("", "ascii");
+        }
+    });
+
+    function getBinValue() {
+        val = 0;
+        
+        if($('#bin7').text() == '1')
+            val += 128;
+        if($('#bin6').text() == '1')
+            val += 64;
+        if($('#bin5').text() == '1')
+            val += 32;
+        if($('#bin4').text() == '1')
+            val += 16;
+        if($('#bin3').text() == '1')
+            val += 8;
+        if($('#bin2').text() == '1')
+            val += 4;
+        if($('#bin1').text() == '1')
+            val += 2;
+        if($('#bin0').text() == '1')
+            val += 1;
+
+        updateValues(val, "binary");
+    }
+
+    function updateValues(num, sender) {
+        if(sender != "binary") {
+            $('#bin7').text('0');
+            $('#bin6').text('0');
+            $('#bin5').text('0');
+            $('#bin4').text('0');
+            $('#bin3').text('0');
+            $('#bin2').text('0');
+            $('#bin1').text('0');
+            $('#bin0').text('0');
+
+            if(!isNaN(num)) {
+                if(num & 128)
+                    $('#bin7').text('1');
+                if(num & 64)
+                    $('#bin6').text('1');
+                if(num & 32)
+                    $('#bin5').text('1');
+                if(num & 16)
+                    $('#bin4').text('1');
+                if(num & 8)
+                    $('#bin3').text('1');
+                if(num & 4)
+                    $('#bin2').text('1');
+                if(num & 2)
+                    $('#bin1').text('1');
+                if(num & 1)
+                    $('#bin0').text('1');
+                    
+            }
+        }
+
+        if(sender !="octal") {
+            if(isNaN(num)){
+                $("#octal").val("");
+            } else {
+                $("#octal").val(num.toString(8));
+            }
+        }
+
+        if(sender !="decimal") {
+            if(isNaN(num)){
+                $("#decimal").val("");
+            } else {
+                $("#decimal").val(num);
+            }
+        }
+        
+        if(sender !="hex") {
+            if(isNaN(num)){
+                $("#hex").val("");
+            } else {
+                $("#hex").val(num.toString(16));
+            }
+        }   
+
+        if(sender !="ascii") {
+            if(isNaN(num)){
+                $("#ascii").val("");
+            } else {
+                $("#ascii").val(String.fromCharCode(num));
+            }
+        }             
+    }
+
+</script>
+                    
+

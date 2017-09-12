@@ -52,12 +52,23 @@
                     <button class="binaryToggle" id="bin1">0</button>
                     <button class="binaryToggle" id="bin0">0</button>
                 </div>
+            </section>
+            <section>
                 <div>
-                    <button class="binButton">Reverse Bits</button>
-                    <button class="binButton">Invert Bits</button>
+                    <button class="binButton" id="shift_left">Shift Left</button>
+                    <button class="binButton" id="shift_right">Shift Right</button>
+                </div><br>
+                <div>
+                    <button class="binButton" id="roll_left">Roll Left</button>
+                    <button class="binButton" id="roll_right">Roll Right</button>
+                </div><br>
+                <div>
+                    <button class="binButton" id="rev_bits">Reverse Bits</button>
+                    <button class="binButton" id="inv_bits">Invert Bits</button>
                 </div>
             </section>
         </div>
+
                    
 <script>
 
@@ -158,7 +169,91 @@
     $(".binaryToggle").click(function(ct) {
         $(this).text(parseInt($(this).text()) ^1);
         getBinValue();
-    })     
+    });
+
+    $("#shift_left").click(function() {
+        $("#bin7").text($("#bin6").text());
+        $("#bin6").text($("#bin5").text());
+        $("#bin5").text($("#bin4").text());
+        $("#bin4").text($("#bin3").text());
+        $("#bin3").text($("#bin2").text());
+        $("#bin2").text($("#bin1").text());
+        $("#bin1").text($("#bin0").text());
+        $("#bin0").text("0");
+        getBinValue();
+    }); 
+
+    $("#shift_right").click(function() {
+        $("#bin0").text($("#bin1").text());
+        $("#bin1").text($("#bin2").text());
+        $("#bin2").text($("#bin3").text());
+        $("#bin3").text($("#bin4").text());
+        $("#bin4").text($("#bin5").text());
+        $("#bin5").text($("#bin6").text());
+        $("#bin6").text($("#bin7").text());
+        $("#bin7").text("0");
+        getBinValue();
+    }); 
+
+    $("#roll_left").click(function() {
+        carry = $("#bin7").text();
+        $("#bin7").text($("#bin6").text());
+        $("#bin6").text($("#bin5").text());
+        $("#bin5").text($("#bin4").text());
+        $("#bin4").text($("#bin3").text());
+        $("#bin3").text($("#bin2").text());
+        $("#bin2").text($("#bin1").text());
+        $("#bin1").text($("#bin0").text());
+        $("#bin0").text(carry);
+        getBinValue();
+    });   
+
+    $("#roll_right").click(function() {
+        carry = $("#bin0").text();
+        $("#bin0").text($("#bin1").text());
+        $("#bin1").text($("#bin2").text());
+        $("#bin2").text($("#bin3").text());
+        $("#bin3").text($("#bin4").text());
+        $("#bin4").text($("#bin5").text());
+        $("#bin5").text($("#bin6").text());
+        $("#bin6").text($("#bin7").text());
+        $("#bin7").text(carry);
+        getBinValue();
+    });      
+
+    function invertBit(bitName, index) {
+        if($(bitName).text() == '0')
+            $(bitName).text('1')
+        else
+            $(bitName).text('0')
+    }
+
+    $("#inv_bits").click(function() {
+        var bits = ["#bin0", "#bin1", "#bin2", "#bin3", 
+                    "#bin4", "#bin5", "#bin6", "#bin7" ]
+        bits.forEach(invertBit);                    
+        getBinValue();
+    });
+
+    $("#rev_bits").click(function() {
+        carry = $("#bin0").text();
+        $("#bin0").text($("#bin7").text());
+        $("#bin7").text(carry);
+
+        carry = $("#bin1").text();
+        $("#bin1").text($("#bin6").text());
+        $("#bin6").text(carry);
+
+        carry = $("#bin2").text();
+        $("#bin2").text($("#bin5").text());
+        $("#bin5").text(carry);
+
+        carry = $("#bin3").text();
+        $("#bin3").text($("#bin4").text());
+        $("#bin4").text(carry);                
+
+        getBinValue();
+    });
 
     // Limit ASCII box to a single char
     $("#ascii").keypress(function(k_event) {
